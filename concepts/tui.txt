@@ -1,0 +1,82 @@
+
+Sketches of how to use the TUI and how that can be combined with
+simple config files.
+
+kaf -gl [<target> ..] [<dir> ..]
+
+=== Concepts ===
+
+== Build ==
+
+A build is a predefined set of phases with an order. When a build is
+the target, the phases in the build are executed in order.
+
+== Phase ==
+
+A phase consisits of a number of tasks and filesets. When a phase is
+used a target everything in that phase is built in dependency order.
+Tasks and filesets can also belong to the null phase, meaning they can
+only be executed explicitly.
+
+== Task == 
+
+Phases are built from a number of unordered tasks that belongs to that
+phase. Tasks can depend on tasks or filesets. They can produce
+filesets. Task can also perform things that have side effects or
+return status and do not produce filesets (like run tests).
+
+Tasks can depend and produce filesets based on rules that makes use of
+current dir.
+
+== Filesets ==
+
+Filesets can be files, file patterns or directories. Filesets
+represent a number of files and/or directories in the file system that
+may or may not exist (or may exists but in an old version) at the
+point of kaf invocation. A fileset is specified on the commandline by
+any file or directory in the fileset. 
+
+Filesets can depend dynamic and depend on the current dir.
+
+== Execution ==
+
+An execution of kaf is done with a target (or the default target). The
+target is a list of builds, phases, tasks and filesets (designated by
+files or directories).
+
+If there is a name conflict the build is picked before the phase and
+phase before task and task before fileset. To avoid this the target
+can be prefixed with either b: p: t: or f:.
+
+The dir can also conflict, and that is picked before anything else.
+
+=== Scenarios ===
+
+== Global execution global dependencies ==
+
+If you are in the root directory the whole tree will be executed by
+default. This is a local execution from the top dir but also the same
+thing as a global execution.
+
+With flag -g (--global) efterything will be executed from the root dir
+regardless of where you are. Specifying of dir overrides -g flag.
+
+== Local execution global dependencies ==
+
+If you are in a subdir, things in that subdir and their global
+dependencies will be executed by default. This is a local execution.
+
+If you give a subdir on the command line everything from that subdir
+down will be executed including their global dependencies.
+
+== Local execution local dependencies ===
+
+With flag -l (--local-dependencies-only) the local execution will not
+execute dependencies outside the subtree (not affect any files outside
+subtree). Flag --no-warn-global-dependencies will turn off warnings of
+global dependencies.
+
+=== Example pep8 ===
+
+/sub/sub2> kaf pep8      => execute pep8 task on all .py files in sub2
+/sub/sub2> kaf -g pep8   => execute pep8 task on all .py files in tree
